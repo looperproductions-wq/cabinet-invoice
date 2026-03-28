@@ -40,6 +40,8 @@ const credentials = Credentials({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // Required; without it Auth.js returns "Server error" / Configuration. Set AUTH_SECRET on the host (e.g. Vercel env).
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(prisma),
   providers: [...authConfig.providers, credentials],
 });

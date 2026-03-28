@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Environment variables (required)
+
+Add these in **Vercel → Project → Settings → Environment Variables** (all environments you use: Production / Preview):
+
+| Variable | Notes |
+|----------|--------|
+| `DATABASE_URL` | PostgreSQL connection string (e.g. Neon), with `sslmode=require` if the host requires SSL. |
+| `AUTH_SECRET` | Long random string (`openssl rand -base64 32`). **If this is missing, Auth.js shows a generic “Server error / problem with the server configuration” page.** |
+
+Copy `.env.example` locally. Optional: `AUTH_URL` (your production URL) if redirects misbehave; Google OAuth vars if you use Google sign-in.
