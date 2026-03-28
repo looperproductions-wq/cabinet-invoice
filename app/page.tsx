@@ -1,65 +1,143 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { centsToDollars } from "@/lib/money";
+import { invoiceTotalCents } from "@/lib/invoice-calcs";
 
-export default function Home() {
+export default async function DashboardPage() {
+  const [clientCount, invoices] = await Promise.all([
+    prisma.client.count(),
+    prisma.invoice.findMany({
+      include: {
+        client: true,
+        lineItems: true,
+      },
+      orderBy: { issueDate: "desc" },
+      take: 8,
+    }),
+  ]);
+
+  const unpaid = invoices.filter(
+    (inv) => inv.status === "SENT" || inv.status === "DRAFT"
+  );
+  const outstandingCents = unpaid.reduce((sum, inv) => {
+    const { totalCents } = invoiceTotalCents(inv.lineItems, inv.taxRateBps);
+    return sum + totalCents;
+  }, 0);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-stone-600">
+          Overview of clients and recent invoices.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">Clients</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-stone-900">
+            {clientCount}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/clients/new"
+            className="mt-3 inline-block text-sm font-medium text-stone-800 underline"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Add a client
+          </Link>
         </div>
-      </main>
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">Open invoices</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-stone-900">
+            {unpaid.length}
+          </p>
+          <Link
+            href="/invoices/new"
+            className="mt-3 inline-block text-sm font-medium text-stone-800 underline"
+          >
+            New invoice
+          </Link>
+        </div>
+        <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-stone-500">
+            Outstanding (draft + sent)
+          </p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-stone-900">
+            {centsToDollars(outstandingCents)}
+          </p>
+          <p className="mt-2 text-xs text-stone-500">Excludes paid invoices.</p>
+        </div>
+      </div>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-stone-900">
+            Recent invoices
+          </h2>
+          <Link
+            href="/invoices"
+            className="text-sm font-medium text-stone-700 underline"
+          >
+            View all
+          </Link>
+        </div>
+        {invoices.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-stone-300 bg-white p-10 text-center text-stone-600">
+            <p>No invoices yet.</p>
+            <Link
+              href="/invoices/new"
+              className="mt-2 inline-block font-medium text-stone-900 underline"
+            >
+              Create your first invoice
+            </Link>
+          </div>
+        ) : (
+          <ul className="divide-y divide-stone-200 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+            {invoices.map((inv) => {
+              const { totalCents } = invoiceTotalCents(
+                inv.lineItems,
+                inv.taxRateBps
+              );
+              return (
+                <li key={inv.id}>
+                  <Link
+                    href={`/invoices/${inv.id}`}
+                    className="flex flex-col gap-1 px-4 py-4 transition hover:bg-stone-50 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="font-medium text-stone-900">
+                        {inv.invoiceNumber}
+                      </p>
+                      <p className="text-sm text-stone-600">
+                        {inv.client.name}
+                        {inv.client.company ? ` · ${inv.client.company}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 sm:text-right">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          inv.status === "PAID"
+                            ? "bg-emerald-100 text-emerald-900"
+                            : inv.status === "SENT"
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-stone-200 text-stone-800"
+                        }`}
+                      >
+                        {inv.status.toLowerCase()}
+                      </span>
+                      <span className="text-sm font-semibold tabular-nums text-stone-900">
+                        {centsToDollars(totalCents)}
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

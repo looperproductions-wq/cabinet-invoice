@@ -1,0 +1,50 @@
+// Cabinet painting — clients & invoices (PostgreSQL for Vercel/serverless)
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoices  Invoice[]
+}
+
+model Invoice {
+  id            String            @id @default(cuid())
+  invoiceNumber String            @unique
+  clientId      String
+  client        Client            @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  issueDate     DateTime          @default(now())
+  dueDate       DateTime?
+  status        String            @default("DRAFT")
+  notes         String?
+  /// Tax as basis points (825 = 8.25%)
+  taxRateBps    Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lineItems     InvoiceLineItem[]
+}
+
+model InvoiceLineItem {
+  id              String  @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description     String
+  quantity        Float   @default(1)
+  unitAmountCents Int
+  sortOrder       Int     @default(0)
+}
