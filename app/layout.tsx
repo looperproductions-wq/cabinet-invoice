@@ -17,8 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CabinetPaint — Clients & Invoices",
-  description: "Manage clients and invoices for your cabinet painting business.",
+  title: "CabinetPaint — Clients, Estimates & Invoices",
+  description:
+    "Manage clients, estimates, and invoices for your cabinet painting business.",
 };
 
 export default function RootLayout({

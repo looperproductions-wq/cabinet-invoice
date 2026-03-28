@@ -5,7 +5,7 @@ export default async function ClientsPage() {
   const clients = await prisma.client.findMany({
     orderBy: { name: "asc" },
     include: {
-      _count: { select: { invoices: true } },
+      _count: { select: { invoices: true, estimates: true } },
     },
   });
 
@@ -55,8 +55,10 @@ export default async function ClientsPage() {
                     </p>
                   </div>
                   <span className="text-sm text-stone-500">
-                    {c._count.invoices} invoice
-                    {c._count.invoices === 1 ? "" : "s"}
+                    {c._count.invoices} inv
+                    {c._count.invoices === 1 ? "" : "s"} · {c._count.estimates}{" "}
+                    est
+                    {c._count.estimates === 1 ? "" : "s"}
                   </span>
                 </div>
               </Link>

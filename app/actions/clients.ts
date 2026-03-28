@@ -40,13 +40,20 @@ export async function updateClient(clientId: string, formData: FormData) {
   revalidatePath("/clients");
   revalidatePath(`/clients/${clientId}`);
   revalidatePath("/invoices");
+  revalidatePath("/estimates");
   redirect("/clients");
 }
 
 export async function deleteClient(clientId: string) {
-  const count = await prisma.invoice.count({ where: { clientId } });
-  if (count > 0) {
-    return { error: "Remove or reassign invoices before deleting this client." };
+  const [invoiceCount, estimateCount] = await Promise.all([
+    prisma.invoice.count({ where: { clientId } }),
+    prisma.estimate.count({ where: { clientId } }),
+  ]);
+  if (invoiceCount > 0 || estimateCount > 0) {
+    return {
+      error:
+        "Remove or reassign invoices and estimates before deleting this client.",
+    };
   }
   await prisma.client.delete({ where: { id: clientId } });
   revalidatePath("/clients");

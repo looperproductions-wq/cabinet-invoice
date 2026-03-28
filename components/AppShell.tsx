@@ -3,6 +3,7 @@ import Link from "next/link";
 const nav = [
   { href: "/", label: "Dashboard" },
   { href: "/clients", label: "Clients" },
+  { href: "/estimates", label: "Estimates" },
   { href: "/invoices", label: "Invoices" },
 ];
 
@@ -19,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               CabinetPaint
             </Link>
             <p className="text-sm text-stone-500">
-              Clients & invoices for your painting business
+              Clients, estimates & invoices for your painting business
             </p>
           </div>
           <nav className="flex flex-wrap gap-1">

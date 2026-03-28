@@ -16,6 +16,16 @@ export default async function EditClientPage({ params }: Props) {
         take: 10,
         select: { id: true, invoiceNumber: true, status: true, issueDate: true },
       },
+      estimates: {
+        orderBy: { issueDate: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          estimateNumber: true,
+          status: true,
+          issueDate: true,
+        },
+      },
     },
   });
 
@@ -41,6 +51,34 @@ export default async function EditClientPage({ params }: Props) {
           Client details
         </h2>
         <ClientForm mode="edit" client={client} />
+      </section>
+
+      <section className="border-t border-stone-200 pt-8">
+        <h2 className="mb-4 text-base font-semibold text-stone-900">
+          Recent estimates
+        </h2>
+        {client.estimates.length === 0 ? (
+          <p className="text-sm text-stone-600">No estimates for this client yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {client.estimates.map((est) => (
+              <li key={est.id}>
+                <Link
+                  href={`/estimates/${est.id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm hover:bg-stone-50"
+                >
+                  <span className="font-medium text-stone-900">
+                    {est.estimateNumber}
+                  </span>
+                  <span className="text-stone-500">
+                    {est.issueDate.toLocaleDateString()} ·{" "}
+                    {est.status.toLowerCase()}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="border-t border-stone-200 pt-8">
