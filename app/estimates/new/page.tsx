@@ -1,10 +1,38 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
 import { EstimateForm } from "@/components/EstimateForm";
+import { GuestGate } from "@/components/GuestGate";
 
 export default async function NewEstimatePage() {
-  const user = await requireUser();
+  const user = await getOptionalUser();
+
+  if (!user) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Link
+            href="/estimates"
+            className="text-sm font-medium text-stone-600 underline hover:text-stone-900"
+          >
+            ← Estimates
+          </Link>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+            New estimate
+          </h1>
+          <p className="mt-1 text-stone-600">
+            Build a quote with line items and tax. Numbers look like EST-2026-0001.
+          </p>
+        </div>
+        <GuestGate
+          title="Sign in to create estimates"
+          description="Estimates are saved to your account. Create a free account or sign in to continue."
+          callbackPath="/estimates/new"
+        />
+      </div>
+    );
+  }
+
   const clients = await prisma.client.findMany({
     where: { userId: user.id },
     orderBy: { name: "asc" },

@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
 import { ClientForm } from "@/components/ClientForm";
 import { DeleteClientButton } from "@/components/DeleteClientButton";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditClientPage({ params }: Props) {
-  const user = await requireUser();
+  const user = await getOptionalUser();
+  if (!user) {
+    notFound();
+  }
   const { id } = await params;
   const client = await prisma.client.findFirst({
     where: { id, userId: user.id },

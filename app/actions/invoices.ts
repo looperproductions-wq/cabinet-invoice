@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dollarsToCents, percentToBps } from "@/lib/money";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
-import { getActionUser } from "@/lib/require-user";
+import { getActionUser, SAVE_REQUIRES_ACCOUNT } from "@/lib/require-user";
 
 export type LinePayload = {
   description: string;
@@ -22,7 +22,7 @@ export async function createInvoice(payload: {
   lines: LinePayload[];
 }) {
   const user = await getActionUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };
@@ -81,7 +81,7 @@ export async function updateInvoice(
   }
 ) {
   const user = await getActionUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };

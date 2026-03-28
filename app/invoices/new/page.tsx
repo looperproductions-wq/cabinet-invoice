@@ -1,10 +1,38 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
 import { InvoiceForm } from "@/components/InvoiceForm";
+import { GuestGate } from "@/components/GuestGate";
 
 export default async function NewInvoicePage() {
-  const user = await requireUser();
+  const user = await getOptionalUser();
+
+  if (!user) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Link
+            href="/invoices"
+            className="text-sm font-medium text-stone-600 underline hover:text-stone-900"
+          >
+            ← Invoices
+          </Link>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+            New invoice
+          </h1>
+          <p className="mt-1 text-stone-600">
+            Add line items, tax, and notes. Invoice numbers are assigned automatically.
+          </p>
+        </div>
+        <GuestGate
+          title="Sign in to create invoices"
+          description="Invoices are saved to your account. Create a free account or sign in to build and keep invoices."
+          callbackPath="/invoices/new"
+        />
+      </div>
+    );
+  }
+
   const clients = await prisma.client.findMany({
     where: { userId: user.id },
     orderBy: { name: "asc" },

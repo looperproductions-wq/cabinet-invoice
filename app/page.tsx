@@ -2,7 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { centsToDollars } from "@/lib/money";
 import { invoiceTotalCents } from "@/lib/invoice-calcs";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
+import { GuestHome } from "@/components/GuestHome";
 
 function estimateStatusClass(status: string) {
   switch (status) {
@@ -18,7 +19,11 @@ function estimateStatusClass(status: string) {
 }
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  const user = await getOptionalUser();
+  if (!user) {
+    return <GuestHome />;
+  }
+
   const [clientCount, invoices, estimates] = await Promise.all([
     prisma.client.count({ where: { userId: user.id } }),
     prisma.invoice.findMany({

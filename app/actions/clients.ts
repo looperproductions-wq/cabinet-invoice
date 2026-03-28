@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getActionUser } from "@/lib/require-user";
+import { getActionUser, SAVE_REQUIRES_ACCOUNT } from "@/lib/require-user";
 
 export async function createClient(formData: FormData) {
   const user = await getActionUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Name is required." };
@@ -29,7 +29,7 @@ export async function createClient(formData: FormData) {
 
 export async function updateClient(clientId: string, formData: FormData) {
   const user = await getActionUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Name is required." };
@@ -56,7 +56,7 @@ export async function updateClient(clientId: string, formData: FormData) {
 
 export async function deleteClient(clientId: string) {
   const user = await getActionUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
   const [invoiceCount, estimateCount] = await Promise.all([
     prisma.invoice.count({

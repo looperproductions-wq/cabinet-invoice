@@ -1,14 +1,39 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
 import { EstimateForm } from "@/components/EstimateForm";
+import { GuestGate } from "@/components/GuestGate";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditEstimatePage({ params }: Props) {
-  const user = await requireUser();
+  const user = await getOptionalUser();
   const { id } = await params;
+
+  if (!user) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <Link
+            href={`/estimates/${id}`}
+            className="text-sm font-medium text-stone-600 underline hover:text-stone-900"
+          >
+            ← Estimate
+          </Link>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+            Edit estimate
+          </h1>
+        </div>
+        <GuestGate
+          title="Sign in to edit estimates"
+          description="Editing saves to your account. Sign in or register to continue."
+          callbackPath={`/estimates/${id}/edit`}
+        />
+      </div>
+    );
+  }
+
   const [estimate, clients] = await Promise.all([
     prisma.estimate.findFirst({
       where: { id, userId: user.id },

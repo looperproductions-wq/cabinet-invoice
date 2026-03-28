@@ -2,7 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { centsToDollars } from "@/lib/money";
 import { invoiceTotalCents } from "@/lib/invoice-calcs";
-import { requireUser } from "@/lib/require-user";
+import { getOptionalUser } from "@/lib/require-user";
+import { GuestBanner } from "@/components/GuestBanner";
 
 function estimateStatusClass(status: string) {
   switch (status) {
@@ -18,18 +19,26 @@ function estimateStatusClass(status: string) {
 }
 
 export default async function EstimatesPage() {
-  const user = await requireUser();
-  const estimates = await prisma.estimate.findMany({
-    where: { userId: user.id },
-    orderBy: { issueDate: "desc" },
-    include: {
-      client: true,
-      lineItems: true,
-    },
-  });
+  const user = await getOptionalUser();
+  const estimates = user
+    ? await prisma.estimate.findMany({
+        where: { userId: user.id },
+        orderBy: { issueDate: "desc" },
+        include: {
+          client: true,
+          lineItems: true,
+        },
+      })
+    : [];
+
+  const newHref = user
+    ? "/estimates/new"
+    : `/signup?callbackUrl=${encodeURIComponent("/estimates/new")}`;
 
   return (
     <div className="space-y-8">
+      {!user && <GuestBanner callbackPath="/estimates" />}
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
@@ -40,22 +49,31 @@ export default async function EstimatesPage() {
           </p>
         </div>
         <Link
-          href="/estimates/new"
+          href={newHref}
           className="inline-flex items-center justify-center rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800"
         >
-          New estimate
+          {user ? "New estimate" : "New estimate (sign up to save)"}
         </Link>
       </div>
 
       {estimates.length === 0 ? (
         <div className="rounded-xl border border-dashed border-stone-300 bg-white p-12 text-center text-stone-600">
-          <p>No estimates yet.</p>
-          <Link
-            href="/estimates/new"
-            className="mt-2 inline-block font-medium text-stone-900 underline"
-          >
-            Create an estimate
-          </Link>
+          <p>{user ? "No estimates yet." : "No saved estimates while browsing as a guest."}</p>
+          {user ? (
+            <Link
+              href="/estimates/new"
+              className="mt-2 inline-block font-medium text-stone-900 underline"
+            >
+              Create an estimate
+            </Link>
+          ) : (
+            <Link
+              href={`/signup?callbackUrl=${encodeURIComponent("/estimates/new")}`}
+              className="mt-2 inline-block font-medium text-stone-900 underline"
+            >
+              Create an account to save estimates
+            </Link>
+          )}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm">

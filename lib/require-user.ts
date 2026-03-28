@@ -20,3 +20,18 @@ export async function getActionUser() {
   const id = session?.user?.id;
   return id ? { id } : null;
 }
+
+export const SAVE_REQUIRES_ACCOUNT =
+  "Sign in or create an account to save data.";
+
+/** For pages that work with or without a session. */
+export async function getOptionalUser() {
+  const session = await auth();
+  const id = session?.user?.id;
+  if (!id) return null;
+  return {
+    id,
+    email: session.user!.email,
+    name: session.user!.name,
+  };
+}

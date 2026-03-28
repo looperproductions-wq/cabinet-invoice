@@ -18,16 +18,9 @@ export default {
   pages: { signIn: "/login" },
   trustHost: true,
   callbacks: {
-    authorized({ auth, request }) {
-      const path = request.nextUrl.pathname;
-      if (
-        path.startsWith("/login") ||
-        path.startsWith("/signup") ||
-        path.startsWith("/api/auth")
-      ) {
-        return true;
-      }
-      return !!auth?.user;
+    // App is public; saving data is enforced in server actions (requires sign-in).
+    authorized() {
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {

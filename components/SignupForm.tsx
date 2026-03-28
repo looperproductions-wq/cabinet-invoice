@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { registerUser } from "@/app/actions/register";
 
 export function SignupForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
@@ -26,7 +29,11 @@ export function SignupForm() {
         return;
       }
       // Full navigation is more reliable than router.push after a server action.
-      window.location.assign("/login?registered=1");
+      const loginQs = new URLSearchParams({
+        registered: "1",
+        callbackUrl,
+      });
+      window.location.assign(`/login?${loginQs.toString()}`);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Could not create account.";
@@ -112,7 +119,14 @@ export function SignupForm() {
       </button>
       <p className="text-center text-sm text-stone-600">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-stone-900 underline">
+        <Link
+          href={
+            callbackUrl && callbackUrl !== "/"
+              ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : "/login"
+          }
+          className="font-medium text-stone-900 underline"
+        >
           Sign in
         </Link>
       </p>
