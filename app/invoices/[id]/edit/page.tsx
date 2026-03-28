@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 import { InvoiceForm } from "@/components/InvoiceForm";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditInvoicePage({ params }: Props) {
+  const user = await requireUser();
   const { id } = await params;
   const [invoice, clients] = await Promise.all([
-    prisma.invoice.findUnique({
-      where: { id },
+    prisma.invoice.findFirst({
+      where: { id, userId: user.id },
       include: { lineItems: true },
     }),
     prisma.client.findMany({
+      where: { userId: user.id },
       orderBy: { name: "asc" },
       select: { id: true, name: true, company: true },
     }),

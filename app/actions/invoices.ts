@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dollarsToCents, percentToBps } from "@/lib/money";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
+import { getActionUser } from "@/lib/require-user";
 
 export type LinePayload = {
   description: string;
@@ -20,8 +21,16 @@ export async function createInvoice(payload: {
   notes: string;
   lines: LinePayload[];
 }) {
+  const user = await getActionUser();
+  if (!user) return { error: "You must be signed in." };
+
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId: user.id },
+  });
+  if (!client) return { error: "Invalid client." };
 
   const lines = normalizeLines(payload.lines);
   if (!lines.length) return { error: "Add at least one line item." };
@@ -31,11 +40,12 @@ export async function createInvoice(payload: {
   const taxRateBps = percentToBps(payload.taxPercent);
   const notes = payload.notes?.trim() || null;
 
-  const invoiceNumber = await nextInvoiceNumber();
+  const invoiceNumber = await nextInvoiceNumber(user.id);
 
   await prisma.invoice.create({
     data: {
       invoiceNumber,
+      userId: user.id,
       clientId,
       issueDate,
       dueDate,
@@ -70,8 +80,21 @@ export async function updateInvoice(
     lines: LinePayload[];
   }
 ) {
+  const user = await getActionUser();
+  if (!user) return { error: "You must be signed in." };
+
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId: user.id },
+  });
+  if (!client) return { error: "Invalid client." };
+
+  const existing = await prisma.invoice.findFirst({
+    where: { id: invoiceId, userId: user.id },
+  });
+  if (!existing) return { error: "Invoice not found." };
 
   const lines = normalizeLines(payload.lines);
   if (!lines.length) return { error: "Add at least one line item." };
@@ -112,9 +135,12 @@ export async function updateInvoice(
 }
 
 export async function setInvoiceStatus(invoiceId: string, status: string) {
+  const user = await getActionUser();
+  if (!user) return;
+
   const s = normalizeStatus(status);
-  await prisma.invoice.update({
-    where: { id: invoiceId },
+  await prisma.invoice.updateMany({
+    where: { id: invoiceId, userId: user.id },
     data: { status: s },
   });
   revalidatePath("/invoices");
@@ -123,7 +149,12 @@ export async function setInvoiceStatus(invoiceId: string, status: string) {
 }
 
 export async function deleteInvoice(invoiceId: string) {
-  await prisma.invoice.delete({ where: { id: invoiceId } });
+  const user = await getActionUser();
+  if (!user) return;
+
+  await prisma.invoice.deleteMany({
+    where: { id: invoiceId, userId: user.id },
+  });
   revalidatePath("/invoices");
   revalidatePath("/");
   redirect("/invoices");

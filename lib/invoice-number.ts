@@ -1,10 +1,10 @@
 import { prisma } from "./prisma";
 
-export async function nextInvoiceNumber(): Promise<string> {
+export async function nextInvoiceNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `INV-${year}-`;
   const rows = await prisma.invoice.findMany({
-    where: { invoiceNumber: { startsWith: prefix } },
+    where: { userId, invoiceNumber: { startsWith: prefix } },
     select: { invoiceNumber: true },
   });
   let max = 0;

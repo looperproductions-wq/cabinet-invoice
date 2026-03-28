@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dollarsToCents, percentToBps } from "@/lib/money";
 import { nextEstimateNumber } from "@/lib/estimate-number";
+import { getActionUser } from "@/lib/require-user";
 
 export type EstimateLinePayload = {
   description: string;
@@ -20,8 +21,16 @@ export async function createEstimate(payload: {
   notes: string;
   lines: EstimateLinePayload[];
 }) {
+  const user = await getActionUser();
+  if (!user) return { error: "You must be signed in." };
+
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId: user.id },
+  });
+  if (!client) return { error: "Invalid client." };
 
   const lines = normalizeLines(payload.lines);
   if (!lines.length) return { error: "Add at least one line item." };
@@ -31,11 +40,12 @@ export async function createEstimate(payload: {
   const taxRateBps = percentToBps(payload.taxPercent);
   const notes = payload.notes?.trim() || null;
 
-  const estimateNumber = await nextEstimateNumber();
+  const estimateNumber = await nextEstimateNumber(user.id);
 
   await prisma.estimate.create({
     data: {
       estimateNumber,
+      userId: user.id,
       clientId,
       issueDate,
       validUntil,
@@ -70,8 +80,21 @@ export async function updateEstimate(
     lines: EstimateLinePayload[];
   }
 ) {
+  const user = await getActionUser();
+  if (!user) return { error: "You must be signed in." };
+
   const clientId = payload.clientId?.trim();
   if (!clientId) return { error: "Choose a client." };
+
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId: user.id },
+  });
+  if (!client) return { error: "Invalid client." };
+
+  const existing = await prisma.estimate.findFirst({
+    where: { id: estimateId, userId: user.id },
+  });
+  if (!existing) return { error: "Estimate not found." };
 
   const lines = normalizeLines(payload.lines);
   if (!lines.length) return { error: "Add at least one line item." };
@@ -112,9 +135,12 @@ export async function updateEstimate(
 }
 
 export async function setEstimateStatus(estimateId: string, status: string) {
+  const user = await getActionUser();
+  if (!user) return;
+
   const s = normalizeEstimateStatus(status);
-  await prisma.estimate.update({
-    where: { id: estimateId },
+  await prisma.estimate.updateMany({
+    where: { id: estimateId, userId: user.id },
     data: { status: s },
   });
   revalidatePath("/estimates");
@@ -123,7 +149,12 @@ export async function setEstimateStatus(estimateId: string, status: string) {
 }
 
 export async function deleteEstimate(estimateId: string) {
-  await prisma.estimate.delete({ where: { id: estimateId } });
+  const user = await getActionUser();
+  if (!user) return;
+
+  await prisma.estimate.deleteMany({
+    where: { id: estimateId, userId: user.id },
+  });
   revalidatePath("/estimates");
   revalidatePath("/");
   redirect("/estimates");

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 import { centsToDollars, bpsToPercentLabel } from "@/lib/money";
 import {
   invoiceTotalCents,
@@ -12,9 +13,10 @@ import { DeleteInvoiceButton } from "@/components/DeleteInvoiceButton";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function InvoiceDetailPage({ params }: Props) {
+  const user = await requireUser();
   const { id } = await params;
-  const invoice = await prisma.invoice.findUnique({
-    where: { id },
+  const invoice = await prisma.invoice.findFirst({
+    where: { id, userId: user.id },
     include: {
       client: true,
       lineItems: { orderBy: { sortOrder: "asc" } },

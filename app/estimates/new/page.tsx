@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 import { EstimateForm } from "@/components/EstimateForm";
 
 export default async function NewEstimatePage() {
+  const user = await requireUser();
   const clients = await prisma.client.findMany({
+    where: { userId: user.id },
     orderBy: { name: "asc" },
     select: { id: true, name: true, company: true },
   });

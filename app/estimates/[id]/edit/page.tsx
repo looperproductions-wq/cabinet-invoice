@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 import { EstimateForm } from "@/components/EstimateForm";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditEstimatePage({ params }: Props) {
+  const user = await requireUser();
   const { id } = await params;
   const [estimate, clients] = await Promise.all([
-    prisma.estimate.findUnique({
-      where: { id },
+    prisma.estimate.findFirst({
+      where: { id, userId: user.id },
       include: { lineItems: true },
     }),
     prisma.client.findMany({
+      where: { userId: user.id },
       orderBy: { name: "asc" },
       select: { id: true, name: true, company: true },
     }),

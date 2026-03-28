@@ -1,10 +1,10 @@
 import { prisma } from "./prisma";
 
-export async function nextEstimateNumber(): Promise<string> {
+export async function nextEstimateNumber(userId: string): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `EST-${year}-`;
   const rows = await prisma.estimate.findMany({
-    where: { estimateNumber: { startsWith: prefix } },
+    where: { userId, estimateNumber: { startsWith: prefix } },
     select: { estimateNumber: true },
   });
   let max = 0;

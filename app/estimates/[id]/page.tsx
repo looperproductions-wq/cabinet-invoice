@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 import { centsToDollars, bpsToPercentLabel } from "@/lib/money";
 import {
   invoiceTotalCents,
@@ -25,9 +26,10 @@ function estimateStatusClass(status: string) {
 }
 
 export default async function EstimateDetailPage({ params }: Props) {
+  const user = await requireUser();
   const { id } = await params;
-  const estimate = await prisma.estimate.findUnique({
-    where: { id },
+  const estimate = await prisma.estimate.findFirst({
+    where: { id, userId: user.id },
     include: {
       client: true,
       lineItems: { orderBy: { sortOrder: "asc" } },

@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/require-user";
 
 export default async function ClientsPage() {
+  const user = await requireUser();
   const clients = await prisma.client.findMany({
+    where: { userId: user.id },
     orderBy: { name: "asc" },
     include: {
       _count: { select: { invoices: true, estimates: true } },

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { requireUser } from "@/lib/require-user";
 import { ClientForm } from "@/components/ClientForm";
 
-export default function NewClientPage() {
+export default async function NewClientPage() {
+  await requireUser();
   return (
     <div className="space-y-8">
       <div>

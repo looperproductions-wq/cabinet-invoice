@@ -2,9 +2,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { centsToDollars } from "@/lib/money";
 import { invoiceTotalCents } from "@/lib/invoice-calcs";
+import { requireUser } from "@/lib/require-user";
 
 export default async function InvoicesPage() {
+  const user = await requireUser();
   const invoices = await prisma.invoice.findMany({
+    where: { userId: user.id },
     orderBy: { issueDate: "desc" },
     include: {
       client: true,
