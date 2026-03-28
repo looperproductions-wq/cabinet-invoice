@@ -2,15 +2,29 @@
 
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
+const AUTH_ERRORS: Record<string, string> = {
+  CredentialsSignin: "Invalid email or password.",
+  Configuration: "Server configuration error. Check AUTH_SECRET and database.",
+  AccessDenied: "Access denied.",
+  Default: "Sign-in failed. Try again.",
+};
 
 export function LoginForm({ showGoogle }: { showGoogle: boolean }) {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const justRegistered = searchParams.get("registered") === "1";
+  const urlError = searchParams.get("error");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (urlError) {
+      setError(AUTH_ERRORS[urlError] ?? AUTH_ERRORS.Default);
+    }
+  }, [urlError]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,20 +36,16 @@ export function LoginForm({ showGoogle }: { showGoogle: boolean }) {
       .value;
 
     try {
-      const res = await signIn("credentials", {
+      // redirect: true avoids a client bug where redirect:false parses data.url
+      // with new URL() and throws on relative URLs (nothing happens / stuck UI).
+      await signIn("credentials", {
         email,
         password,
-        redirect: false,
         callbackUrl,
+        redirect: true,
       });
-      if (res?.error) {
-        setError("Invalid email or password.");
-        setPending(false);
-        return;
-      }
-      window.location.href = res?.url ?? callbackUrl;
     } catch {
-      setError("Something went wrong. Try again.");
+      setError("Invalid email or password.");
       setPending(false);
     }
   }

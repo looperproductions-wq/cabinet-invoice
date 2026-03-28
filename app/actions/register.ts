@@ -15,46 +15,55 @@ export type RegisterResult =
   | { ok: false; error?: string; fieldErrors?: Record<string, string> };
 
 export async function registerUser(formData: FormData): Promise<RegisterResult> {
-  const raw = {
-    name: String(formData.get("name") ?? ""),
-    email: String(formData.get("email") ?? ""),
-    password: String(formData.get("password") ?? ""),
-  };
+  try {
+    const raw = {
+      name: String(formData.get("name") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("password") ?? ""),
+    };
 
-  const parsed = schema.safeParse(raw);
-  if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path[0];
-      if (typeof key === "string" && !fieldErrors[key]) {
-        fieldErrors[key] = issue.message;
+    const parsed = schema.safeParse(raw);
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !fieldErrors[key]) {
+          fieldErrors[key] = issue.message;
+        }
       }
+      return { ok: false, fieldErrors };
     }
-    return { ok: false, fieldErrors };
-  }
 
-  const { name, email, password } = parsed.data;
-  const normalizedEmail = email.toLowerCase().trim();
+    const { name, email, password } = parsed.data;
+    const normalizedEmail = email.toLowerCase().trim();
 
-  const existing = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-  });
-  if (existing) {
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+    if (existing) {
+      return {
+        ok: false,
+        fieldErrors: { email: "An account with this email already exists." },
+      };
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: normalizedEmail,
+        passwordHash,
+      },
+    });
+
+    return { ok: true };
+  } catch (e) {
+    console.error("registerUser", e);
     return {
       ok: false,
-      fieldErrors: { email: "An account with this email already exists." },
+      error:
+        "Could not create your account. If this keeps happening, check the database connection.",
     };
   }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  await prisma.user.create({
-    data: {
-      name: name.trim(),
-      email: normalizedEmail,
-      passwordHash,
-    },
-  });
-
-  return { ok: true };
 }

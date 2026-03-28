@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { registerUser } from "@/app/actions/register";
 
 export function SignupForm() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
@@ -16,19 +14,26 @@ export function SignupForm() {
     setError(null);
     setFieldErrors({});
     setPending(true);
-    const fd = new FormData(e.currentTarget);
-    const res = await registerUser(fd);
-    setPending(false);
-    if (!res.ok) {
-      if (res.fieldErrors && Object.keys(res.fieldErrors).length) {
-        setFieldErrors(res.fieldErrors);
+    try {
+      const fd = new FormData(e.currentTarget);
+      const res = await registerUser(fd);
+      if (!res.ok) {
+        if (res.fieldErrors && Object.keys(res.fieldErrors).length) {
+          setFieldErrors(res.fieldErrors);
+        }
+        if (res.error) setError(res.error);
+        if (!res.fieldErrors && !res.error) setError("Could not create account.");
+        return;
       }
-      if (res.error) setError(res.error);
-      if (!res.fieldErrors && !res.error) setError("Could not create account.");
-      return;
+      // Full navigation is more reliable than router.push after a server action.
+      window.location.assign("/login?registered=1");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not create account.";
+      setError(message);
+    } finally {
+      setPending(false);
     }
-    router.push("/login?registered=1");
-    router.refresh();
   }
 
   const fieldClass =

@@ -21,7 +21,8 @@ const credentials = Credentials({
       .safeParse(raw);
     if (!parsed.success) return null;
 
-    const { email, password } = parsed.data;
+    const email = parsed.data.email.toLowerCase().trim();
+    const { password } = parsed.data;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user?.passwordHash) return null;
 
