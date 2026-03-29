@@ -15,6 +15,10 @@ export type LinePayload = {
 
 export async function createInvoice(payload: {
   clientId: string;
+  newClientName: string;
+  newClientCompany: string;
+  newClientEmail: string;
+  newClientPhone: string;
   issueDate: string;
   dueDate: string;
   taxPercent: string;
@@ -24,13 +28,15 @@ export async function createInvoice(payload: {
   const user = await getActionUser();
   if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
-  const clientId = payload.clientId?.trim();
-  if (!clientId) return { error: "Choose a client." };
-
-  const client = await prisma.client.findFirst({
-    where: { id: clientId, userId: user.id },
+  const resolved = await resolveClientForUser(user.id, {
+    clientId: payload.clientId,
+    newClientName: payload.newClientName,
+    newClientCompany: payload.newClientCompany,
+    newClientEmail: payload.newClientEmail,
+    newClientPhone: payload.newClientPhone,
   });
-  if (!client) return { error: "Invalid client." };
+  if ("error" in resolved) return { error: resolved.error };
+  const clientId = resolved.clientId;
 
   const lines = normalizeLines(payload.lines);
   if (!lines.length) return { error: "Add at least one line item." };
@@ -72,6 +78,10 @@ export async function updateInvoice(
   invoiceId: string,
   payload: {
     clientId: string;
+    newClientName: string;
+    newClientCompany: string;
+    newClientEmail: string;
+    newClientPhone: string;
     issueDate: string;
     dueDate: string;
     taxPercent: string;
@@ -83,13 +93,15 @@ export async function updateInvoice(
   const user = await getActionUser();
   if (!user) return { error: SAVE_REQUIRES_ACCOUNT };
 
-  const clientId = payload.clientId?.trim();
-  if (!clientId) return { error: "Choose a client." };
-
-  const client = await prisma.client.findFirst({
-    where: { id: clientId, userId: user.id },
+  const resolved = await resolveClientForUser(user.id, {
+    clientId: payload.clientId,
+    newClientName: payload.newClientName,
+    newClientCompany: payload.newClientCompany,
+    newClientEmail: payload.newClientEmail,
+    newClientPhone: payload.newClientPhone,
   });
-  if (!client) return { error: "Invalid client." };
+  if ("error" in resolved) return { error: resolved.error };
+  const clientId = resolved.clientId;
 
   const existing = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId: user.id },
@@ -158,6 +170,47 @@ export async function deleteInvoice(invoiceId: string) {
   revalidatePath("/invoices");
   revalidatePath("/");
   redirect("/invoices");
+}
+
+async function resolveClientForUser(
+  userId: string,
+  payload: {
+    clientId: string;
+    newClientName: string;
+    newClientCompany: string;
+    newClientEmail: string;
+    newClientPhone: string;
+  }
+): Promise<{ clientId: string } | { error: string }> {
+  const cid = payload.clientId?.trim();
+  if (cid) {
+    const client = await prisma.client.findFirst({
+      where: { id: cid, userId },
+    });
+    if (!client) return { error: "Invalid client." };
+    return { clientId: cid };
+  }
+  const name = payload.newClientName?.trim() ?? "";
+  if (!name) {
+    return {
+      error: "Select a client or enter a new client name under “Bill to.”",
+    };
+  }
+  const client = await prisma.client.create({
+    data: {
+      userId,
+      name,
+      company: emptyToNull(payload.newClientCompany),
+      email: emptyToNull(payload.newClientEmail),
+      phone: emptyToNull(payload.newClientPhone),
+    },
+  });
+  return { clientId: client.id };
+}
+
+function emptyToNull(s: string | undefined) {
+  const t = s?.trim() ?? "";
+  return t.length ? t : null;
 }
 
 function normalizeLines(lines: LinePayload[]) {

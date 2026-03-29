@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { auth } from "@/auth";
 import { AppShell } from "@/components/AppShell";
+import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
@@ -19,9 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CabinetPaint — Clients, Estimates & Invoices",
+  title: `${APP_NAME} — ${APP_TAGLINE}`,
   description:
-    "Manage clients, estimates, and invoices for your cabinet painting business.",
+    "Create estimates and invoices and manage clients.",
 };
 
 export default async function RootLayout({

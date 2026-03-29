@@ -3,10 +3,12 @@
 import { useState } from "react";
 import type { Client } from "@prisma/client";
 import { createClient, updateClient } from "@/app/actions/clients";
+import { SAVE_REQUIRES_ACCOUNT } from "@/lib/save-account";
+import { GuestSavePrompt } from "@/components/GuestSavePrompt";
 
 type Props =
-  | { mode: "create"; action?: undefined; client?: undefined }
-  | { mode: "edit"; client: Client; action?: undefined };
+  | { mode: "create"; callbackPath: string }
+  | { mode: "edit"; client: Client; callbackPath: string };
 
 const fieldClass =
   "mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-stone-900 shadow-sm outline-none ring-stone-400 focus:border-stone-400 focus:ring-2";
@@ -35,13 +37,16 @@ export function ClientForm(props: Props) {
 
   return (
     <form onSubmit={onSubmit} className="max-w-xl space-y-5">
-      {error && (
+      {error && error !== SAVE_REQUIRES_ACCOUNT && (
         <p
           className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800"
           role="alert"
         >
           {error}
         </p>
+      )}
+      {error === SAVE_REQUIRES_ACCOUNT && (
+        <GuestSavePrompt callbackPath={props.callbackPath} />
       )}
       <div>
         <label htmlFor="name" className="text-sm font-medium text-stone-700">

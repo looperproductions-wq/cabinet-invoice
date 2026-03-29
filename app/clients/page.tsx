@@ -29,7 +29,7 @@ export default async function ClientsPage() {
             Clients
           </h1>
           <p className="mt-1 text-stone-600">
-            People and businesses you bill for cabinet work.
+            People and businesses you bill.
           </p>
         </div>
         <Link

@@ -55,7 +55,11 @@ export default async function EditClientPage({ params }: Props) {
         <h2 className="mb-4 text-base font-semibold text-stone-900">
           Client details
         </h2>
-        <ClientForm mode="edit" client={client} />
+        <ClientForm
+          mode="edit"
+          client={client}
+          callbackPath={`/clients/${client.id}`}
+        />
       </section>
 
       <section className="border-t border-stone-200 pt-8">

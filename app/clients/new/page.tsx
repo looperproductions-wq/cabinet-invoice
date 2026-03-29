@@ -1,11 +1,7 @@
 import Link from "next/link";
-import { getOptionalUser } from "@/lib/require-user";
 import { ClientForm } from "@/components/ClientForm";
-import { GuestGate } from "@/components/GuestGate";
 
 export default async function NewClientPage() {
-  const user = await getOptionalUser();
-
   return (
     <div className="space-y-8">
       <div>
@@ -19,18 +15,11 @@ export default async function NewClientPage() {
           New client
         </h1>
         <p className="mt-1 text-stone-600">
-          Store contact details for estimates and invoices.
+          Store contact details for estimates and invoices. You can fill this out
+          before signing in; saving requires an account.
         </p>
       </div>
-      {user ? (
-        <ClientForm mode="create" />
-      ) : (
-        <GuestGate
-          title="Sign in to save clients"
-          description="Adding a client saves to your account. Create a free account or sign in to continue."
-          callbackPath="/clients/new"
-        />
-      )}
+      <ClientForm mode="create" callbackPath="/clients/new" />
     </div>
   );
 }

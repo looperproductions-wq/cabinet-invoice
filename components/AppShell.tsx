@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
 import { MainNav } from "@/components/MainNav";
 import { HeaderAuth } from "@/components/HeaderAuth";
 
@@ -18,11 +19,9 @@ export function AppShell({
               href="/"
               className="text-lg font-semibold tracking-tight text-stone-900"
             >
-              CabinetPaint
+              {APP_NAME}
             </Link>
-            <p className="text-sm text-stone-500">
-              Clients, estimates & invoices for your painting business
-            </p>
+            <p className="text-sm text-stone-500">{APP_TAGLINE}</p>
           </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             <MainNav />

@@ -9,6 +9,7 @@ import {
 } from "@/lib/invoice-calcs";
 import { InvoiceStatusActions } from "@/components/InvoiceStatusActions";
 import { DeleteInvoiceButton } from "@/components/DeleteInvoiceButton";
+import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -130,10 +131,8 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
               From
             </p>
-            <p className="mt-2 font-medium text-stone-900">CabinetPaint</p>
-            <p className="text-sm text-stone-600">
-              Cabinet painting services
-            </p>
+            <p className="mt-2 font-medium text-stone-900">{APP_NAME}</p>
+            <p className="text-sm text-stone-600">{APP_TAGLINE}</p>
           </div>
         </section>
 

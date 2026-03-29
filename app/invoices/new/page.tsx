@@ -2,42 +2,16 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getOptionalUser } from "@/lib/require-user";
 import { InvoiceForm } from "@/components/InvoiceForm";
-import { GuestGate } from "@/components/GuestGate";
 
 export default async function NewInvoicePage() {
   const user = await getOptionalUser();
-
-  if (!user) {
-    return (
-      <div className="space-y-8">
-        <div>
-          <Link
-            href="/invoices"
-            className="text-sm font-medium text-stone-600 underline hover:text-stone-900"
-          >
-            ← Invoices
-          </Link>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
-            New invoice
-          </h1>
-          <p className="mt-1 text-stone-600">
-            Add line items, tax, and notes. Invoice numbers are assigned automatically.
-          </p>
-        </div>
-        <GuestGate
-          title="Sign in to create invoices"
-          description="Invoices are saved to your account. Create a free account or sign in to build and keep invoices."
-          callbackPath="/invoices/new"
-        />
-      </div>
-    );
-  }
-
-  const clients = await prisma.client.findMany({
-    where: { userId: user.id },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, company: true },
-  });
+  const clients = user
+    ? await prisma.client.findMany({
+        where: { userId: user.id },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, company: true },
+      })
+    : [];
 
   return (
     <div className="space-y-8">
@@ -52,26 +26,15 @@ export default async function NewInvoicePage() {
           New invoice
         </h1>
         <p className="mt-1 text-stone-600">
-          Add line items, tax, and notes. Invoice numbers are assigned automatically.
+          Add line items, tax, and notes. Invoice numbers are assigned when you
+          save (after sign-in). Guests can draft here first.
         </p>
       </div>
-
-      {clients.length === 0 ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
-          <p className="font-medium">Add a client first</p>
-          <p className="mt-1 text-sm text-amber-900/90">
-            You need at least one client before creating an invoice.
-          </p>
-          <Link
-            href="/clients/new"
-            className="mt-3 inline-block text-sm font-semibold underline"
-          >
-            Create a client
-          </Link>
-        </div>
-      ) : (
-        <InvoiceForm mode="create" clients={clients} />
-      )}
+      <InvoiceForm
+        mode="create"
+        clients={clients}
+        callbackPath="/invoices/new"
+      />
     </div>
   );
 }

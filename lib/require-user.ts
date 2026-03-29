@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { SAVE_REQUIRES_ACCOUNT } from "@/lib/save-account";
+
+export { SAVE_REQUIRES_ACCOUNT };
 
 export async function requireUser() {
   const session = await auth();
@@ -20,9 +23,6 @@ export async function getActionUser() {
   const id = session?.user?.id;
   return id ? { id } : null;
 }
-
-export const SAVE_REQUIRES_ACCOUNT =
-  "Sign in or create an account to save data.";
 
 /** For pages that work with or without a session. */
 export async function getOptionalUser() {

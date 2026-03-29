@@ -32,7 +32,7 @@ export default async function InvoicesPage() {
             Invoices
           </h1>
           <p className="mt-1 text-stone-600">
-            Create and track bills for your cabinet painting jobs.
+            Create and track bills for your jobs.
           </p>
         </div>
         <Link

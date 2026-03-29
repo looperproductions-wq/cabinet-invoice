@@ -64,7 +64,12 @@ export default async function EditEstimatePage({ params }: Props) {
           Update line items, dates, tax, or status.
         </p>
       </div>
-      <EstimateForm mode="edit" clients={clients} estimate={estimate} />
+      <EstimateForm
+        mode="edit"
+        clients={clients}
+        estimate={estimate}
+        callbackPath={`/estimates/${estimate.id}/edit`}
+      />
     </div>
   );
 }

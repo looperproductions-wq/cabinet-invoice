@@ -64,7 +64,12 @@ export default async function EditInvoicePage({ params }: Props) {
           Update line items, dates, tax, or status.
         </p>
       </div>
-      <InvoiceForm mode="edit" clients={clients} invoice={invoice} />
+      <InvoiceForm
+        mode="edit"
+        clients={clients}
+        invoice={invoice}
+        callbackPath={`/invoices/${invoice.id}/edit`}
+      />
     </div>
   );
 }

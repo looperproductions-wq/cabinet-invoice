@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { APP_NAME } from "@/lib/branding";
 
 export function GuestHome() {
   return (
     <div className="space-y-10">
       <div className="rounded-xl border border-stone-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
-          Welcome to CabinetPaint
+          Welcome to {APP_NAME}
         </h1>
         <p className="mt-3 max-w-2xl text-stone-600">
           Look around the dashboard, clients, estimates, and invoices anytime

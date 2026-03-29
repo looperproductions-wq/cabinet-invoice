@@ -9,6 +9,8 @@ import {
 } from "@/app/actions/estimates";
 import { bpsToPercentLabel, centsToDollars } from "@/lib/money";
 import { invoiceTotalCents } from "@/lib/invoice-calcs";
+import { SAVE_REQUIRES_ACCOUNT } from "@/lib/save-account";
+import { GuestSavePrompt } from "@/components/GuestSavePrompt";
 import Link from "next/link";
 
 type LineRow = { description: string; quantity: string; unitDollars: string };
@@ -17,11 +19,13 @@ type Props =
   | {
       mode: "create";
       clients: Pick<Client, "id" | "name" | "company">[];
+      callbackPath: string;
     }
   | {
       mode: "edit";
       clients: Pick<Client, "id" | "name" | "company">[];
       estimate: Estimate & { lineItems: EstimateLineItem[] };
+      callbackPath: string;
     };
 
 const fieldClass =
@@ -49,7 +53,7 @@ export function EstimateForm(props: Props) {
     }
     return [
       {
-        description: "Kitchen cabinet painting (estimate)",
+        description: "Interior painting (estimate)",
         quantity: "1",
         unitDollars: "",
       },
@@ -82,6 +86,10 @@ export function EstimateForm(props: Props) {
   );
   const [lines, setLines] = useState<LineRow[]>(initialLines);
   const [error, setError] = useState<string | null>(null);
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientCompany, setNewClientCompany] = useState("");
+  const [newClientEmail, setNewClientEmail] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
 
   const previewTotals = useMemo(() => {
     const fakeItems = lines
@@ -119,10 +127,25 @@ export function EstimateForm(props: Props) {
       quantity: parseFloat(l.quantity) || 1,
       unitDollars: l.unitDollars,
     }));
+    if (!clientId.trim() && !newClientName.trim()) {
+      setError(
+        "Select an existing client or enter a new client name under Prepared for."
+      );
+      return;
+    }
+
+    const clientPayload = {
+      clientId,
+      newClientName,
+      newClientCompany,
+      newClientEmail,
+      newClientPhone,
+    };
+
     try {
       if (props.mode === "create") {
         const res = await createEstimate({
-          clientId,
+          ...clientPayload,
           issueDate,
           validUntil,
           taxPercent,
@@ -132,7 +155,7 @@ export function EstimateForm(props: Props) {
         if (res?.error) setError(res.error);
       } else {
         const res = await updateEstimate(props.estimate.id, {
-          clientId,
+          ...clientPayload,
           issueDate,
           validUntil,
           taxPercent,
@@ -149,7 +172,7 @@ export function EstimateForm(props: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {error && (
+      {error && error !== SAVE_REQUIRES_ACCOUNT && (
         <p
           className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800"
           role="alert"
@@ -157,20 +180,27 @@ export function EstimateForm(props: Props) {
           {error}
         </p>
       )}
+      {error === SAVE_REQUIRES_ACCOUNT && (
+        <GuestSavePrompt callbackPath={props.callbackPath} />
+      )}
 
       <section className="grid gap-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label htmlFor="clientId" className="text-sm font-medium text-stone-700">
-            Client <span className="text-red-600">*</span>
+          <p className="text-sm font-medium text-stone-800">Prepared for</p>
+          <p className="mt-1 text-sm text-stone-500">
+            Choose a saved client, or enter a new one for this estimate (saved when
+            you sign in).
+          </p>
+          <label htmlFor="clientId" className="mt-3 block text-sm font-medium text-stone-700">
+            Existing client
           </label>
           <select
             id="clientId"
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
-            required
             className={fieldClass}
           >
-            <option value="">Select a client…</option>
+            <option value="">None — use new client below</option>
             {props.clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -179,14 +209,68 @@ export function EstimateForm(props: Props) {
             ))}
           </select>
           <p className="mt-1 text-sm text-stone-500">
-            Need someone new?{" "}
+            Or{" "}
             <Link
               href="/clients/new"
               className="font-medium text-stone-800 underline"
             >
-              Add a client
+              add a client on its own page
             </Link>
+            .
           </p>
+          <div className="mt-4 space-y-3 rounded-lg border border-stone-200 bg-stone-50/80 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+              New client on this estimate
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label htmlFor="newEstClientName" className="text-xs text-stone-600">
+                  Name (required if no client selected)
+                </label>
+                <input
+                  id="newEstClientName"
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  className={fieldClass}
+                  placeholder="Jane Smith"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="newEstClientCompany" className="text-xs text-stone-600">
+                  Company
+                </label>
+                <input
+                  id="newEstClientCompany"
+                  value={newClientCompany}
+                  onChange={(e) => setNewClientCompany(e.target.value)}
+                  className={fieldClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="newEstClientEmail" className="text-xs text-stone-600">
+                  Email
+                </label>
+                <input
+                  id="newEstClientEmail"
+                  type="email"
+                  value={newClientEmail}
+                  onChange={(e) => setNewClientEmail(e.target.value)}
+                  className={fieldClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="newEstClientPhone" className="text-xs text-stone-600">
+                  Phone
+                </label>
+                <input
+                  id="newEstClientPhone"
+                  value={newClientPhone}
+                  onChange={(e) => setNewClientPhone(e.target.value)}
+                  className={fieldClass}
+                />
+              </div>
+            </div>
+          </div>
         </div>
         <div>
           <label htmlFor="issueDate" className="text-sm font-medium text-stone-700">
