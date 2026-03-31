@@ -53,6 +53,12 @@ export default async function InvoiceDetailPage({ params }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <a
+            href={`/api/invoices/${invoice.id}/pdf`}
+            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-900 hover:bg-stone-50"
+          >
+            Download PDF
+          </a>
           <Link
             href={`/invoices/${invoice.id}/edit`}
             className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800"
@@ -196,7 +202,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
       </article>
 
       <p className="no-print text-center text-xs text-stone-500">
-        Use your browser&apos;s print dialog for a clean PDF or paper copy.
+        Download PDF above, or use print for a paper copy.
       </p>
     </div>
   );

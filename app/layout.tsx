@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: `${APP_NAME} — ${APP_TAGLINE}`,
   description:
-    "Create estimates and invoices and manage clients.",
+    "Create estimates and invoices, manage clients, and download PDFs.",
 };
 
 export default async function RootLayout({
