@@ -20,7 +20,10 @@ export type EstimatePdfData = {
   validUntilLabel: string | null;
   status: string;
   fromName: string;
-  fromTagline: string;
+  fromAddress: string | null;
+  fromEmail: string | null;
+  fromPhone: string | null;
+  fromNotes: string | null;
   clientName: string;
   clientCompany: string | null;
   clientAddress: string | null;
@@ -158,7 +161,18 @@ export function EstimatePdfDocument({ data }: { data: EstimatePdfData }) {
           <View style={styles.col}>
             <Text style={styles.sectionLabel}>From</Text>
             <Text style={[styles.body, { fontWeight: "bold" }]}>{data.fromName}</Text>
-            <Text style={styles.body}>{data.fromTagline}</Text>
+            {data.fromAddress ? (
+              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromAddress}</Text>
+            ) : null}
+            {data.fromEmail ? (
+              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromEmail}</Text>
+            ) : null}
+            {data.fromPhone ? (
+              <Text style={[styles.body, { marginTop: 2 }]}>{data.fromPhone}</Text>
+            ) : null}
+            {data.fromNotes ? (
+              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromNotes}</Text>
+            ) : null}
           </View>
         </View>
 

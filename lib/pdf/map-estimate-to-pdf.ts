@@ -1,5 +1,5 @@
 import type { Client, Estimate, EstimateLineItem } from "@prisma/client";
-import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
+import { APP_NAME } from "@/lib/branding";
 import { centsToDollars, bpsToPercentLabel } from "@/lib/money";
 import { invoiceTotalCents, lineSubtotalCents } from "@/lib/invoice-calcs";
 import type { EstimatePdfData } from "./estimate-pdf";
@@ -9,7 +9,18 @@ export type EstimateForPdf = Estimate & {
   lineItems: EstimateLineItem[];
 };
 
-export function estimateToPdfData(estimate: EstimateForPdf): EstimatePdfData {
+export type CompanyForPdf = {
+  name: string;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+};
+
+export function estimateToPdfData(
+  estimate: EstimateForPdf,
+  company: CompanyForPdf | null
+): EstimatePdfData {
   const { subtotalCents, taxCents, totalCents } = invoiceTotalCents(
     estimate.lineItems,
     estimate.taxRateBps
@@ -29,8 +40,11 @@ export function estimateToPdfData(estimate: EstimateForPdf): EstimatePdfData {
       ? estimate.validUntil.toLocaleDateString("en-US")
       : null,
     status: estimate.status.toLowerCase(),
-    fromName: APP_NAME,
-    fromTagline: APP_TAGLINE,
+    fromName: company?.name ?? APP_NAME,
+    fromAddress: company?.address ?? null,
+    fromEmail: company?.email ?? null,
+    fromPhone: company?.phone ?? null,
+    fromNotes: company?.notes ?? null,
     clientName: estimate.client.name,
     clientCompany: estimate.client.company,
     clientAddress: estimate.client.address,

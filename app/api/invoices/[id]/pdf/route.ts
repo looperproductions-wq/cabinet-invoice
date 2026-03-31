@@ -30,7 +30,8 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const data = invoiceToPdfData(invoice);
+  const company = await prisma.company.findUnique({ where: { userId } });
+  const data = invoiceToPdfData(invoice, company);
   const buffer = await renderInvoicePdfBuffer(data);
   const name = pdfSafeFileName(invoice.invoiceNumber);
 

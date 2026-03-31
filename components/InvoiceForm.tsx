@@ -59,6 +59,9 @@ export function InvoiceForm(props: Props) {
   const [clientId, setClientId] = useState(
     props.mode === "edit" ? props.invoice.clientId : ""
   );
+  const [invoiceNumberOverride, setInvoiceNumberOverride] = useState(
+    props.mode === "edit" ? props.invoice.invoiceNumber : ""
+  );
   const [issueDate, setIssueDate] = useState(
     props.mode === "edit"
       ? toDateInput(props.invoice.issueDate)
@@ -143,6 +146,7 @@ export function InvoiceForm(props: Props) {
       if (props.mode === "create") {
         const res = await createInvoice({
           ...clientPayload,
+          invoiceNumber: invoiceNumberOverride,
           issueDate,
           dueDate,
           taxPercent,
@@ -153,6 +157,7 @@ export function InvoiceForm(props: Props) {
       } else {
         const res = await updateInvoice(props.invoice.id, {
           ...clientPayload,
+          invoiceNumber: invoiceNumberOverride,
           issueDate,
           dueDate,
           taxPercent,
@@ -262,6 +267,21 @@ export function InvoiceForm(props: Props) {
               </div>
             </div>
           </div>
+        </div>
+        <div>
+          <label htmlFor="invoiceNumber" className="text-sm font-medium text-stone-700">
+            Invoice number
+          </label>
+          <input
+            id="invoiceNumber"
+            value={invoiceNumberOverride}
+            onChange={(e) => setInvoiceNumberOverride(e.target.value)}
+            className={fieldClass}
+            placeholder="Auto (leave blank)"
+          />
+          <p className="mt-1 text-xs text-stone-500">
+            Leave blank to auto-generate.
+          </p>
         </div>
         <div>
           <label htmlFor="issueDate" className="text-sm font-medium text-stone-700">

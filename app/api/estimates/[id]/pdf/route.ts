@@ -30,7 +30,8 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
-  const data = estimateToPdfData(estimate);
+  const company = await prisma.company.findUnique({ where: { userId } });
+  const data = estimateToPdfData(estimate, company);
   const buffer = await renderEstimatePdfBuffer(data);
   const name = pdfSafeFileName(estimate.estimateNumber);
 

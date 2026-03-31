@@ -8,6 +8,7 @@ const nav = [
   { href: "/clients", label: "Clients" },
   { href: "/estimates", label: "Estimates" },
   { href: "/invoices", label: "Invoices" },
+  { href: "/company", label: "Company" },
 ];
 
 export function MainNav() {

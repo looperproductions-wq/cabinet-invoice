@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { dollarsToCents, percentToBps } from "@/lib/money";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { getActionUser, SAVE_REQUIRES_ACCOUNT } from "@/lib/require-user";
+import { Prisma } from "@prisma/client";
 
 export type LinePayload = {
   description: string;
@@ -19,6 +20,7 @@ export async function createInvoice(payload: {
   newClientCompany: string;
   newClientEmail: string;
   newClientPhone: string;
+  invoiceNumber?: string;
   issueDate: string;
   dueDate: string;
   taxPercent: string;
@@ -46,28 +48,38 @@ export async function createInvoice(payload: {
   const taxRateBps = percentToBps(payload.taxPercent);
   const notes = payload.notes?.trim() || null;
 
-  const invoiceNumber = await nextInvoiceNumber(user.id);
+  const providedInvoiceNumber = payload.invoiceNumber?.trim();
+  const invoiceNumber = providedInvoiceNumber
+    ? providedInvoiceNumber
+    : await nextInvoiceNumber(user.id);
 
-  await prisma.invoice.create({
-    data: {
-      invoiceNumber,
-      userId: user.id,
-      clientId,
-      issueDate,
-      dueDate,
-      taxRateBps,
-      notes,
-      status: "DRAFT",
-      lineItems: {
-        create: lines.map((line, i) => ({
-          description: line.description,
-          quantity: line.quantity,
-          unitAmountCents: line.unitAmountCents,
-          sortOrder: i,
-        })),
+  try {
+    await prisma.invoice.create({
+      data: {
+        invoiceNumber,
+        userId: user.id,
+        clientId,
+        issueDate,
+        dueDate,
+        taxRateBps,
+        notes,
+        status: "DRAFT",
+        lineItems: {
+          create: lines.map((line, i) => ({
+            description: line.description,
+            quantity: line.quantity,
+            unitAmountCents: line.unitAmountCents,
+            sortOrder: i,
+          })),
+        },
       },
-    },
-  });
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { error: "That invoice number is already in use. Pick another." };
+    }
+    return { error: "Could not create invoice." };
+  }
 
   revalidatePath("/invoices");
   revalidatePath("/");
@@ -82,6 +94,7 @@ export async function updateInvoice(
     newClientCompany: string;
     newClientEmail: string;
     newClientPhone: string;
+    invoiceNumber?: string;
     issueDate: string;
     dueDate: string;
     taxPercent: string;
@@ -105,6 +118,7 @@ export async function updateInvoice(
 
   const existing = await prisma.invoice.findFirst({
     where: { id: invoiceId, userId: user.id },
+    select: { invoiceNumber: true },
   });
   if (!existing) return { error: "Invoice not found." };
 
@@ -116,29 +130,41 @@ export async function updateInvoice(
   const taxRateBps = percentToBps(payload.taxPercent);
   const notes = payload.notes?.trim() || null;
   const status = normalizeStatus(payload.status);
+  const providedInvoiceNumber = payload.invoiceNumber?.trim();
+  const invoiceNumber = providedInvoiceNumber
+    ? providedInvoiceNumber
+    : existing.invoiceNumber;
 
-  await prisma.$transaction([
-    prisma.invoiceLineItem.deleteMany({ where: { invoiceId } }),
-    prisma.invoice.update({
-      where: { id: invoiceId },
-      data: {
-        clientId,
-        issueDate,
-        dueDate,
-        taxRateBps,
-        notes,
-        status,
-        lineItems: {
-          create: lines.map((line, i) => ({
-            description: line.description,
-            quantity: line.quantity,
-            unitAmountCents: line.unitAmountCents,
-            sortOrder: i,
-          })),
+  try {
+    await prisma.$transaction([
+      prisma.invoiceLineItem.deleteMany({ where: { invoiceId } }),
+      prisma.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          invoiceNumber,
+          clientId,
+          issueDate,
+          dueDate,
+          taxRateBps,
+          notes,
+          status,
+          lineItems: {
+            create: lines.map((line, i) => ({
+              description: line.description,
+              quantity: line.quantity,
+              unitAmountCents: line.unitAmountCents,
+              sortOrder: i,
+            })),
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { error: "That invoice number is already in use. Pick another." };
+    }
+    return { error: "Could not update invoice." };
+  }
 
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${invoiceId}`);

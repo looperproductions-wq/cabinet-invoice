@@ -1,5 +1,5 @@
 import type { Client, Invoice, InvoiceLineItem } from "@prisma/client";
-import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
+import { APP_NAME } from "@/lib/branding";
 import { centsToDollars, bpsToPercentLabel } from "@/lib/money";
 import { invoiceTotalCents, lineSubtotalCents } from "@/lib/invoice-calcs";
 import type { InvoicePdfData } from "./invoice-pdf";
@@ -9,7 +9,18 @@ export type InvoiceForPdf = Invoice & {
   lineItems: InvoiceLineItem[];
 };
 
-export function invoiceToPdfData(invoice: InvoiceForPdf): InvoicePdfData {
+export type CompanyForPdf = {
+  name: string;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+};
+
+export function invoiceToPdfData(
+  invoice: InvoiceForPdf,
+  company: CompanyForPdf | null
+): InvoicePdfData {
   const { subtotalCents, taxCents, totalCents } = invoiceTotalCents(
     invoice.lineItems,
     invoice.taxRateBps
@@ -29,8 +40,11 @@ export function invoiceToPdfData(invoice: InvoiceForPdf): InvoicePdfData {
       ? invoice.dueDate.toLocaleDateString("en-US")
       : null,
     status: invoice.status.toLowerCase(),
-    fromName: APP_NAME,
-    fromTagline: APP_TAGLINE,
+    fromName: company?.name ?? APP_NAME,
+    fromAddress: company?.address ?? null,
+    fromEmail: company?.email ?? null,
+    fromPhone: company?.phone ?? null,
+    fromNotes: company?.notes ?? null,
     clientName: invoice.client.name,
     clientCompany: invoice.client.company,
     clientAddress: invoice.client.address,

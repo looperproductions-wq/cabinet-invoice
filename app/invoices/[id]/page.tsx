@@ -9,7 +9,7 @@ import {
 } from "@/lib/invoice-calcs";
 import { InvoiceStatusActions } from "@/components/InvoiceStatusActions";
 import { DeleteInvoiceButton } from "@/components/DeleteInvoiceButton";
-import { APP_NAME, APP_TAGLINE } from "@/lib/branding";
+import { APP_NAME } from "@/lib/branding";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -19,13 +19,16 @@ export default async function InvoiceDetailPage({ params }: Props) {
     notFound();
   }
   const { id } = await params;
-  const invoice = await prisma.invoice.findFirst({
-    where: { id, userId: user.id },
-    include: {
-      client: true,
-      lineItems: { orderBy: { sortOrder: "asc" } },
-    },
-  });
+  const [invoice, company] = await Promise.all([
+    prisma.invoice.findFirst({
+      where: { id, userId: user.id },
+      include: {
+        client: true,
+        lineItems: { orderBy: { sortOrder: "asc" } },
+      },
+    }),
+    prisma.company.findUnique({ where: { userId: user.id } }),
+  ]);
 
   if (!invoice) notFound();
 
@@ -137,8 +140,23 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">
               From
             </p>
-            <p className="mt-2 font-medium text-stone-900">{APP_NAME}</p>
-            <p className="text-sm text-stone-600">{APP_TAGLINE}</p>
+            <p className="mt-2 font-medium text-stone-900">
+              {company?.name ?? APP_NAME}
+            </p>
+            {company?.address && (
+              <p className="mt-2 whitespace-pre-line text-sm text-stone-600">
+                {company.address}
+              </p>
+            )}
+            <div className="mt-2 text-sm text-stone-600">
+              {company?.email && <p>{company.email}</p>}
+              {company?.phone && <p>{company.phone}</p>}
+            </div>
+            {company?.notes && (
+              <p className="mt-2 whitespace-pre-line text-sm text-stone-700">
+                {company.notes}
+              </p>
+            )}
           </div>
         </section>
 
