@@ -45,96 +45,98 @@ export type EstimatePdfData = {
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 46,
-    paddingBottom: 46,
-    paddingHorizontal: 46,
-    fontSize: 9.5,
+    paddingTop: 0,
+    paddingBottom: 36,
+    paddingHorizontal: 40,
+    fontSize: 9,
     fontFamily: "Helvetica",
     color: "#1c1917",
   },
-  headerRow: {
+  navy: { color: "#152643" },
+  headerBand: {
+    backgroundColor: "#152643",
+    paddingTop: 34,
+    paddingBottom: 22,
+    paddingHorizontal: 40,
+  },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  headerCompany: { fontSize: 18, fontWeight: "bold", color: "#ffffff" },
+  headerSmall: { marginTop: 6, fontSize: 9, color: "#dbe6ff", lineHeight: 1.35 },
+  headerTitle: { fontSize: 30, fontWeight: "bold", color: "#ffffff", letterSpacing: 0.6 },
+  accentLine: { height: 4, backgroundColor: "#3b82f6" },
+
+  content: { marginTop: 18 },
+
+  metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  brandName: { fontSize: 13.5, fontWeight: "bold", marginBottom: 4 },
-  brandLine: { fontSize: 9.5, color: "#44403c", lineHeight: 1.35 },
-  rightTitle: {
-    fontSize: 13.5,
-    fontWeight: "bold",
-    textAlign: "right",
-    letterSpacing: 0.3,
-  },
-  metaGrid: { marginTop: 10, gap: 6 },
-  metaRow: { flexDirection: "row", justifyContent: "space-between", gap: 18 },
-  metaLabel: { fontSize: 7.8, color: "#78716c", letterSpacing: 0.4 },
-  metaValue: { fontSize: 9.5, color: "#1c1917", textAlign: "right" },
-  amountBox: {
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e7e5e4",
-  },
-  amountLabel: {
-    fontSize: 7.8,
-    color: "#78716c",
-    letterSpacing: 0.4,
-    textAlign: "right",
-  },
-  amountValue: { marginTop: 4, fontSize: 13.5, fontWeight: "bold", textAlign: "right" },
-  sectionLabel: { fontSize: 7.8, color: "#78716c", letterSpacing: 0.4, marginBottom: 6 },
-  body: { fontSize: 9.5, color: "#1c1917", lineHeight: 1.35 },
-  billToBlock: { marginBottom: 18 },
-  billToLine: { marginTop: 2, color: "#44403c" },
-  tableHeader: {
-    flexDirection: "row",
-    borderBottomWidth: 1.2,
-    borderBottomColor: "#d6d3d1",
-    paddingBottom: 8,
-    marginTop: 8,
-  },
-  th: { fontSize: 7.8, color: "#78716c", fontWeight: "bold", letterSpacing: 0.2 },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 9,
-    borderBottomWidth: 0.6,
+    gap: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
     borderBottomColor: "#e7e5e4",
   },
-  td: { fontSize: 9.5, color: "#1c1917" },
-  colDesc: { width: "56%" },
-  colQty: { width: "10%", textAlign: "right" },
+  metaCell: { flex: 1 },
+  metaLabel: { fontSize: 7, color: "#6b7280", fontWeight: "bold", letterSpacing: 0.4 },
+  metaValue: { marginTop: 6, fontSize: 10, fontWeight: "bold", color: "#111827" },
+  metaValueBig: { marginTop: 6, fontSize: 11, fontWeight: "bold", color: "#111827" },
+
+  sectionLabel: { marginTop: 18, fontSize: 7, color: "#6b7280", fontWeight: "bold", letterSpacing: 0.4 },
+  body: { fontSize: 9.2, color: "#111827", lineHeight: 1.35 },
+  billToName: { marginTop: 6, fontSize: 11, fontWeight: "bold", color: "#111827" },
+  billToLine: { marginTop: 2, color: "#6b7280" },
+
+  tableWrap: { marginTop: 16, borderWidth: 0, borderColor: "#e5e7eb" },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#152643",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  th: { fontSize: 8, color: "#ffffff", fontWeight: "bold", letterSpacing: 0.3 },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  td: { fontSize: 9.2, color: "#111827" },
+  tdMuted: { color: "#6b7280" },
+  colDesc: { width: "55%" },
+  colQty: { width: "10%", textAlign: "center" },
   colPrice: { width: "17%", textAlign: "right" },
-  colAmt: { width: "17%", textAlign: "right" },
-  totals: { marginTop: 18, alignItems: "flex-end" },
+  colAmt: { width: "18%", textAlign: "right", fontWeight: "bold" },
+
+  totals: { marginTop: 8, alignItems: "flex-end" },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: 220,
-    marginBottom: 6,
-    fontSize: 9.5,
-    color: "#44403c",
+    width: 240,
+    marginTop: 10,
+    fontSize: 9.2,
+    color: "#6b7280",
   },
-  grandTotalRow: {
+  totalBar: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: 220,
-    marginTop: 6,
-    paddingTop: 10,
-    borderTopWidth: 1.2,
-    borderTopColor: "#d6d3d1",
-    fontSize: 11.5,
-    fontWeight: "bold",
-    color: "#1c1917",
+    width: 240,
+    marginTop: 12,
+    backgroundColor: "#152643",
+    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
-  lowerSections: { marginTop: 22, gap: 16 },
-  lowerBlock: { paddingTop: 12, borderTopWidth: 0.6, borderTopColor: "#e7e5e4" },
+  totalBarLabel: { fontSize: 10, fontWeight: "bold", color: "#ffffff", letterSpacing: 0.4 },
+  totalBarValue: { fontSize: 12, fontWeight: "bold", color: "#ffffff" },
+
+  bottomRow: { flexDirection: "row", gap: 28, marginTop: 28 },
+  bottomCol: { flex: 1 },
+  bottomLabel: { fontSize: 7, color: "#6b7280", fontWeight: "bold", letterSpacing: 0.4 },
+  bottomText: { marginTop: 6, fontSize: 9.2, color: "#111827", lineHeight: 1.4 },
+
+  footerRule: { marginTop: 34, borderTopWidth: 1, borderTopColor: "#e7e5e4" },
   footer: {
-    position: "absolute",
-    bottom: 24,
-    left: 46,
-    right: 46,
-    fontSize: 7.5,
-    color: "#a8a29e",
+    marginTop: 12,
+    fontSize: 8,
+    color: "#6b7280",
     textAlign: "center",
   },
 });
@@ -143,42 +145,49 @@ export function EstimatePdfDocument({ data }: { data: EstimatePdfData }) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <View style={styles.headerRow}>
-          <View style={{ maxWidth: 320 }}>
-            <Text style={styles.brandName}>{data.fromName}</Text>
-            {data.fromAddress ? (
-              <Text style={styles.brandLine}>{data.fromAddress}</Text>
-            ) : null}
-            <Text style={styles.brandLine}>
-              {[data.fromPhone, data.fromEmail].filter(Boolean).join(" • ")}
-            </Text>
-          </View>
-          <View style={{ width: 220 }}>
-            <Text style={styles.rightTitle}>{data.docTitle}</Text>
-            <View style={styles.metaGrid}>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>{data.estimateNoLabel}</Text>
-                <Text style={styles.metaValue}>{data.estimateNumber}</Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>{data.dateLabel}</Text>
-                <Text style={styles.metaValue}>{data.issueDateLabel}</Text>
-              </View>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>{data.validUntilLabelText}</Text>
-                <Text style={styles.metaValue}>{data.validUntilLabel ?? "—"}</Text>
-              </View>
+        <View style={styles.headerBand}>
+          <View style={styles.headerRow}>
+            <View style={{ maxWidth: 360 }}>
+              <Text style={styles.headerCompany}>{data.fromName.toUpperCase()}</Text>
+              {data.fromAddress ? (
+                <Text style={styles.headerSmall}>{data.fromAddress}</Text>
+              ) : null}
+              <Text style={styles.headerSmall}>
+                {[
+                  data.fromAddress ? null : null,
+                  [data.fromPhone, data.fromEmail].filter(Boolean).join(" • "),
+                ]
+                  .filter(Boolean)
+                  .join("")}
+              </Text>
             </View>
-            <View style={styles.amountBox}>
-              <Text style={styles.amountLabel}>{data.amountLabel}</Text>
-              <Text style={styles.amountValue}>{data.amount}</Text>
-            </View>
+            <Text style={styles.headerTitle}>{data.docTitle.toUpperCase()}</Text>
           </View>
         </View>
+        <View style={styles.accentLine} />
 
-        <View style={styles.billToBlock}>
+        <View style={[styles.content, { paddingHorizontal: 2 }]}>
+          <View style={styles.metaRow}>
+            <View style={styles.metaCell}>
+              <Text style={styles.metaLabel}>{data.estimateNoLabel}</Text>
+              <Text style={styles.metaValue}>{data.estimateNumber}</Text>
+            </View>
+            <View style={styles.metaCell}>
+              <Text style={styles.metaLabel}>{data.dateLabel}</Text>
+              <Text style={styles.metaValue}>{data.issueDateLabel}</Text>
+            </View>
+            <View style={styles.metaCell}>
+              <Text style={styles.metaLabel}>{data.validUntilLabelText}</Text>
+              <Text style={styles.metaValue}>{data.validUntilLabel ?? "—"}</Text>
+            </View>
+            <View style={styles.metaCell}>
+              <Text style={styles.metaLabel}>{data.amountLabel}</Text>
+              <Text style={styles.metaValueBig}>{data.amount}</Text>
+            </View>
+          </View>
+
           <Text style={styles.sectionLabel}>BILL TO</Text>
-          <Text style={[styles.body, { fontWeight: "bold" }]}>
+          <Text style={styles.billToName}>
             {data.clientCompany ? `${data.clientName} / ${data.clientCompany}` : data.clientName}
           </Text>
           {data.clientAddress ? (
@@ -187,56 +196,68 @@ export function EstimatePdfDocument({ data }: { data: EstimatePdfData }) {
           <Text style={[styles.body, styles.billToLine]}>
             {[data.clientEmail, data.clientPhone].filter(Boolean).join(" • ")}
           </Text>
-        </View>
 
-        <View style={styles.tableHeader}>
-          <Text style={[styles.th, styles.colDesc]}>Description</Text>
-          <Text style={[styles.th, styles.colQty]}>Qty</Text>
-          <Text style={[styles.th, styles.colPrice]}>Rate</Text>
-          <Text style={[styles.th, styles.colAmt]}>Amount</Text>
-        </View>
-        {data.lines.map((line, i) => (
-          <View key={i} style={styles.tableRow} wrap={false}>
-            <Text style={[styles.td, styles.colDesc]}>{line.description}</Text>
-            <Text style={[styles.td, styles.colQty]}>{line.qty}</Text>
-            <Text style={[styles.td, styles.colPrice]}>{line.unit}</Text>
-            <Text style={[styles.td, styles.colAmt]}>{line.amount}</Text>
-          </View>
-        ))}
-
-        <View style={styles.totals}>
-          <View style={styles.totalRow}>
-            <Text>Subtotal</Text>
-            <Text>{data.subtotal}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text>{data.taxLabel}</Text>
-            <Text>{data.tax}</Text>
-          </View>
-          <View style={styles.grandTotalRow}>
-            <Text>TOTAL</Text>
-            <Text>{data.total}</Text>
-          </View>
-        </View>
-
-        <View style={styles.lowerSections}>
-          {data.fromNotes ? (
-            <View style={styles.lowerBlock}>
-              <Text style={styles.sectionLabel}>PAYMENT INFORMATION</Text>
-              <Text style={styles.body}>{data.fromNotes}</Text>
+          <View style={styles.tableWrap}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.th, styles.colDesc]}>DESCRIPTION</Text>
+              <Text style={[styles.th, styles.colQty]}>QTY</Text>
+              <Text style={[styles.th, styles.colPrice]}>RATE</Text>
+              <Text style={[styles.th, styles.colAmt]}>AMOUNT</Text>
             </View>
-          ) : null}
-          {data.notes ? (
-            <View style={styles.lowerBlock}>
-              <Text style={styles.sectionLabel}>NOTES</Text>
-              <Text style={styles.body}>{data.notes}</Text>
-            </View>
-          ) : null}
-        </View>
+            {data.lines.map((line, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.tableRow,
+                  { backgroundColor: i % 2 === 0 ? "#f3f4f6" : "#ffffff" },
+                ]}
+                wrap={false}
+              >
+                <Text style={[styles.td, styles.colDesc]}>{line.description}</Text>
+                <Text style={[styles.td, styles.colQty, styles.tdMuted]}>{line.qty}</Text>
+                <Text style={[styles.td, styles.colPrice, styles.tdMuted]}>{line.unit}</Text>
+                <Text style={[styles.td, styles.colAmt]}>{line.amount}</Text>
+              </View>
+            ))}
+          </View>
 
-        <Text style={styles.footer} fixed>
-          -- 1 of 1 --
-        </Text>
+          <View style={styles.totals}>
+            <View style={styles.totalRow}>
+              <Text>Subtotal</Text>
+              <Text>{data.subtotal}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text>{data.taxLabel}</Text>
+              <Text>{data.tax}</Text>
+            </View>
+            <View style={styles.totalBar}>
+              <Text style={styles.totalBarLabel}>TOTAL</Text>
+              <Text style={styles.totalBarValue}>{data.total}</Text>
+            </View>
+          </View>
+
+          <View style={styles.bottomRow}>
+            {data.fromNotes ? (
+              <View style={styles.bottomCol}>
+                <Text style={styles.bottomLabel}>PAYMENT INFORMATION</Text>
+                <Text style={styles.bottomText}>{data.fromNotes}</Text>
+              </View>
+            ) : (
+              <View style={styles.bottomCol} />
+            )}
+            {data.notes ? (
+              <View style={styles.bottomCol}>
+                <Text style={styles.bottomLabel}>NOTES</Text>
+                <Text style={styles.bottomText}>{data.notes}</Text>
+              </View>
+            ) : (
+              <View style={styles.bottomCol} />
+            )}
+          </View>
+
+          <View style={styles.footerRule} />
+          <Text style={styles.footer}>Thank you for your business!</Text>
+        </View>
       </Page>
     </Document>
   );
