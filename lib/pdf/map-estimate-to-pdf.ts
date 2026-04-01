@@ -34,6 +34,11 @@ export function estimateToPdfData(
   }));
 
   return {
+    docTitle: "ESTIMATE",
+    estimateNoLabel: "ESTIMATE NO.",
+    dateLabel: "DATE",
+    validUntilLabelText: "VALID UNTIL",
+    amountLabel: "ESTIMATED TOTAL",
     estimateNumber: estimate.estimateNumber,
     issueDateLabel: estimate.issueDate.toLocaleDateString("en-US"),
     validUntilLabel: estimate.validUntil
@@ -55,6 +60,7 @@ export function estimateToPdfData(
     taxLabel: `Tax (${bpsToPercentLabel(estimate.taxRateBps)}%)`,
     tax: centsToDollars(taxCents),
     total: centsToDollars(totalCents),
+    amount: centsToDollars(totalCents),
     notes: estimate.notes,
   };
 }

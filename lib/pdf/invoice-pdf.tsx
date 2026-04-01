@@ -15,6 +15,11 @@ export type InvoicePdfLine = {
 };
 
 export type InvoicePdfData = {
+  docTitle: string;
+  invoiceNoLabel: string;
+  dateLabel: string;
+  dueDateLabelText: string;
+  amountDueLabel: string;
   invoiceNumber: string;
   issueDateLabel: string;
   dueDateLabel: string | null;
@@ -34,90 +39,101 @@ export type InvoicePdfData = {
   taxLabel: string;
   tax: string;
   total: string;
+  amountDue: string;
   notes: string | null;
 };
 
 const styles = StyleSheet.create({
   page: {
-    padding: 44,
-    fontSize: 9,
+    paddingTop: 46,
+    paddingBottom: 46,
+    paddingHorizontal: 46,
+    fontSize: 9.5,
     fontFamily: "Helvetica",
     color: "#1c1917",
   },
-  titleRow: {
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e7e5e4",
+    marginBottom: 24,
   },
-  docKind: {
-    fontSize: 8,
-    color: "#78716c",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  docNumber: { fontSize: 16, fontWeight: "bold" },
-  dateBlock: { fontSize: 9, color: "#44403c", textAlign: "right" },
-  twoCol: { flexDirection: "row", gap: 24, marginBottom: 20 },
-  col: { flex: 1 },
-  sectionLabel: {
-    fontSize: 7,
-    color: "#78716c",
-    textTransform: "uppercase",
-    marginBottom: 6,
+  brandName: { fontSize: 13.5, fontWeight: "bold", marginBottom: 4 },
+  brandLine: { fontSize: 9.5, color: "#44403c", lineHeight: 1.35 },
+  rightTitle: {
+    fontSize: 13.5,
+    fontWeight: "bold",
+    textAlign: "right",
     letterSpacing: 0.3,
   },
-  body: { fontSize: 9, color: "#292524", lineHeight: 1.4 },
+  metaGrid: { marginTop: 10, gap: 6 },
+  metaRow: { flexDirection: "row", justifyContent: "space-between", gap: 18 },
+  metaLabel: { fontSize: 7.8, color: "#78716c", letterSpacing: 0.4 },
+  metaValue: { fontSize: 9.5, color: "#1c1917", textAlign: "right" },
+  amountDueBox: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e7e5e4",
+  },
+  amountDueLabel: {
+    fontSize: 7.8,
+    color: "#78716c",
+    letterSpacing: 0.4,
+    textAlign: "right",
+  },
+  amountDueValue: { marginTop: 4, fontSize: 13.5, fontWeight: "bold", textAlign: "right" },
+  sectionLabel: { fontSize: 7.8, color: "#78716c", letterSpacing: 0.4, marginBottom: 6 },
+  body: { fontSize: 9.5, color: "#1c1917", lineHeight: 1.35 },
+  billToBlock: { marginBottom: 18 },
+  billToLine: { marginTop: 2, color: "#44403c" },
   tableHeader: {
     flexDirection: "row",
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.2,
     borderBottomColor: "#d6d3d1",
-    paddingBottom: 6,
+    paddingBottom: 8,
     marginTop: 8,
   },
-  th: { fontSize: 7, color: "#78716c", fontWeight: "bold" },
+  th: { fontSize: 7.8, color: "#78716c", fontWeight: "bold", letterSpacing: 0.2 },
   tableRow: {
     flexDirection: "row",
-    paddingVertical: 8,
-    borderBottomWidth: 0.5,
+    paddingVertical: 9,
+    borderBottomWidth: 0.6,
     borderBottomColor: "#e7e5e4",
   },
-  td: { fontSize: 9, color: "#292524" },
-  colDesc: { width: "42%" },
-  colQty: { width: "12%", textAlign: "right" },
-  colPrice: { width: "21%", textAlign: "right" },
-  colAmt: { width: "25%", textAlign: "right", fontWeight: "bold" },
-  totals: { marginTop: 16, alignItems: "flex-end" },
+  td: { fontSize: 9.5, color: "#1c1917" },
+  colDesc: { width: "56%" },
+  colQty: { width: "10%", textAlign: "right" },
+  colPrice: { width: "17%", textAlign: "right" },
+  colAmt: { width: "17%", textAlign: "right" },
+  totals: { marginTop: 18, alignItems: "flex-end" },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: 200,
-    marginBottom: 4,
-    fontSize: 9,
-    color: "#57534e",
+    width: 220,
+    marginBottom: 6,
+    fontSize: 9.5,
+    color: "#44403c",
   },
-  grandTotal: {
+  grandTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: 200,
+    width: 220,
     marginTop: 6,
-    paddingTop: 8,
-    borderTopWidth: 1,
+    paddingTop: 10,
+    borderTopWidth: 1.2,
     borderTopColor: "#d6d3d1",
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: "bold",
     color: "#1c1917",
   },
-  notesBlock: { marginTop: 20, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: "#e7e5e4" },
+  lowerSections: { marginTop: 22, gap: 16 },
+  lowerBlock: { paddingTop: 12, borderTopWidth: 0.6, borderTopColor: "#e7e5e4" },
   footer: {
     position: "absolute",
-    bottom: 28,
-    left: 44,
-    right: 44,
-    fontSize: 7,
+    bottom: 24,
+    left: 46,
+    right: 46,
+    fontSize: 7.5,
     color: "#a8a29e",
     textAlign: "center",
   },
@@ -127,59 +143,56 @@ export function InvoicePdfDocument({ data }: { data: InvoicePdfData }) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <View style={styles.titleRow}>
-          <View>
-            <Text style={styles.docKind}>Invoice</Text>
-            <Text style={styles.docNumber}>{data.invoiceNumber}</Text>
-            <Text style={[styles.body, { marginTop: 4, color: "#78716c" }]}>
-              Status: {data.status}
+        <View style={styles.headerRow}>
+          <View style={{ maxWidth: 320 }}>
+            <Text style={styles.brandName}>{data.fromName}</Text>
+            {data.fromAddress ? (
+              <Text style={styles.brandLine}>{data.fromAddress}</Text>
+            ) : null}
+            <Text style={styles.brandLine}>
+              {[data.fromPhone, data.fromEmail].filter(Boolean).join(" • ")}
             </Text>
           </View>
-          <View style={styles.dateBlock}>
-            <Text>Issued: {data.issueDateLabel}</Text>
-            {data.dueDateLabel ? (
-              <Text style={{ marginTop: 4 }}>Due: {data.dueDateLabel}</Text>
-            ) : null}
+          <View style={{ width: 220 }}>
+            <Text style={styles.rightTitle}>{data.docTitle}</Text>
+            <View style={styles.metaGrid}>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaLabel}>{data.invoiceNoLabel}</Text>
+                <Text style={styles.metaValue}>{data.invoiceNumber}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaLabel}>{data.dateLabel}</Text>
+                <Text style={styles.metaValue}>{data.issueDateLabel}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaLabel}>{data.dueDateLabelText}</Text>
+                <Text style={styles.metaValue}>{data.dueDateLabel ?? "—"}</Text>
+              </View>
+            </View>
+            <View style={styles.amountDueBox}>
+              <Text style={styles.amountDueLabel}>{data.amountDueLabel}</Text>
+              <Text style={styles.amountDueValue}>{data.amountDue}</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.twoCol}>
-          <View style={styles.col}>
-            <Text style={styles.sectionLabel}>Bill to</Text>
-            <Text style={[styles.body, { fontWeight: "bold" }]}>{data.clientName}</Text>
-            {data.clientCompany ? (
-              <Text style={styles.body}>{data.clientCompany}</Text>
-            ) : null}
-            {data.clientAddress ? (
-              <Text style={[styles.body, { marginTop: 4 }]}>{data.clientAddress}</Text>
-            ) : null}
-            {data.clientEmail ? (
-              <Text style={[styles.body, { marginTop: 4 }]}>{data.clientEmail}</Text>
-            ) : null}
-            {data.clientPhone ? <Text style={styles.body}>{data.clientPhone}</Text> : null}
-          </View>
-          <View style={styles.col}>
-            <Text style={styles.sectionLabel}>From</Text>
-            <Text style={[styles.body, { fontWeight: "bold" }]}>{data.fromName}</Text>
-            {data.fromAddress ? (
-              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromAddress}</Text>
-            ) : null}
-            {data.fromEmail ? (
-              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromEmail}</Text>
-            ) : null}
-            {data.fromPhone ? (
-              <Text style={[styles.body, { marginTop: 2 }]}>{data.fromPhone}</Text>
-            ) : null}
-            {data.fromNotes ? (
-              <Text style={[styles.body, { marginTop: 4 }]}>{data.fromNotes}</Text>
-            ) : null}
-          </View>
+        <View style={styles.billToBlock}>
+          <Text style={styles.sectionLabel}>BILL TO</Text>
+          <Text style={[styles.body, { fontWeight: "bold" }]}>
+            {data.clientCompany ? `${data.clientName} / ${data.clientCompany}` : data.clientName}
+          </Text>
+          {data.clientAddress ? (
+            <Text style={[styles.body, styles.billToLine]}>{data.clientAddress}</Text>
+          ) : null}
+          <Text style={[styles.body, styles.billToLine]}>
+            {[data.clientEmail, data.clientPhone].filter(Boolean).join(" • ")}
+          </Text>
         </View>
 
         <View style={styles.tableHeader}>
           <Text style={[styles.th, styles.colDesc]}>Description</Text>
           <Text style={[styles.th, styles.colQty]}>Qty</Text>
-          <Text style={[styles.th, styles.colPrice]}>Price</Text>
+          <Text style={[styles.th, styles.colPrice]}>Rate</Text>
           <Text style={[styles.th, styles.colAmt]}>Amount</Text>
         </View>
         {data.lines.map((line, i) => (
@@ -200,21 +213,29 @@ export function InvoicePdfDocument({ data }: { data: InvoicePdfData }) {
             <Text>{data.taxLabel}</Text>
             <Text>{data.tax}</Text>
           </View>
-          <View style={styles.grandTotal}>
-            <Text>Total</Text>
+          <View style={styles.grandTotalRow}>
+            <Text>TOTAL</Text>
             <Text>{data.total}</Text>
           </View>
         </View>
 
-        {data.notes ? (
-          <View style={styles.notesBlock}>
-            <Text style={styles.sectionLabel}>Notes</Text>
-            <Text style={styles.body}>{data.notes}</Text>
-          </View>
-        ) : null}
+        <View style={styles.lowerSections}>
+          {data.fromNotes ? (
+            <View style={styles.lowerBlock}>
+              <Text style={styles.sectionLabel}>PAYMENT INFORMATION</Text>
+              <Text style={styles.body}>{data.fromNotes}</Text>
+            </View>
+          ) : null}
+          {data.notes ? (
+            <View style={styles.lowerBlock}>
+              <Text style={styles.sectionLabel}>NOTES</Text>
+              <Text style={styles.body}>{data.notes}</Text>
+            </View>
+          ) : null}
+        </View>
 
         <Text style={styles.footer} fixed>
-          Generated by {data.fromName}
+          -- 1 of 1 --
         </Text>
       </Page>
     </Document>

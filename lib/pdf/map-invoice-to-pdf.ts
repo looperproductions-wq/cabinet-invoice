@@ -34,6 +34,11 @@ export function invoiceToPdfData(
   }));
 
   return {
+    docTitle: "INVOICE",
+    invoiceNoLabel: "INVOICE NO.",
+    dateLabel: "DATE",
+    dueDateLabelText: "DUE DATE",
+    amountDueLabel: "AMOUNT DUE",
     invoiceNumber: invoice.invoiceNumber,
     issueDateLabel: invoice.issueDate.toLocaleDateString("en-US"),
     dueDateLabel: invoice.dueDate
@@ -55,6 +60,7 @@ export function invoiceToPdfData(
     taxLabel: `Tax (${bpsToPercentLabel(invoice.taxRateBps)}%)`,
     tax: centsToDollars(taxCents),
     total: centsToDollars(totalCents),
+    amountDue: centsToDollars(totalCents),
     notes: invoice.notes,
   };
 }
