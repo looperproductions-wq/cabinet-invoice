@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   billToName: { marginTop: 6, fontSize: 11, fontWeight: "bold", color: "#111827" },
   billToLine: { marginTop: 2, color: "#6b7280" },
 
-  tableWrap: { marginTop: 16, borderWidth: 0, borderColor: "#e5e7eb" },
+  tableWrap: { marginTop: 16 },
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#152643",
@@ -153,12 +153,7 @@ export function EstimatePdfDocument({ data }: { data: EstimatePdfData }) {
                 <Text style={styles.headerSmall}>{data.fromAddress}</Text>
               ) : null}
               <Text style={styles.headerSmall}>
-                {[
-                  data.fromAddress ? null : null,
-                  [data.fromPhone, data.fromEmail].filter(Boolean).join(" • "),
-                ]
-                  .filter(Boolean)
-                  .join("")}
+                {[data.fromPhone, data.fromEmail].filter(Boolean).join(" • ")}
               </Text>
             </View>
             <Text style={styles.headerTitle}>{data.docTitle.toUpperCase()}</Text>
